@@ -3,6 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#00f0ff">
+    <meta name="description" content="Sam Quotes - Kaiju-Sized Wisdom. Get random quotes from Sam.">
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect fill='%2312141c' width='192' height='192'/><text x='50%' y='50%' font-size='80' font-weight='bold' fill='%2300f0ff' text-anchor='middle' dominant-baseline='middle' font-family='Impact'>SQ</text></svg>">
     <title>Sam Quotes</title>
     <style>
         :root {
@@ -160,6 +164,56 @@
             transform: translateY(1px);
             box-shadow: 0 0 10px rgba(0, 240, 255, 0.4);
         }
+
+        .install-prompt {
+            display: none;
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(30, 34, 45, 0.95);
+            border: 2px solid #00f0ff;
+            border-radius: 12px;
+            padding: 15px 20px;
+            color: #e2e8f0;
+            font-family: 'Segoe UI', sans-serif;
+            font-size: 0.9rem;
+            box-shadow: 0 0 20px rgba(0, 240, 255, 0.3);
+            z-index: 1000;
+            animation: slideIn 0.3s ease;
+        }
+
+        .install-prompt.show {
+            display: block;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .install-prompt button {
+            background: #00f0ff;
+            color: #12141c;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-top: 10px;
+            width: 100%;
+            transition: all 0.2s;
+        }
+
+        .install-prompt button:hover {
+            background: #00d9e8;
+            transform: scale(1.05);
+        }
     </style>
 </head>
 <body>
@@ -174,14 +228,57 @@
 
         <button class="btn" id="quoteBtn">
             <svg class="btn-icon" viewBox="0 0 24 24">
-                <path d="M12,2C10.5,5 8.5,7.5 6,9C7.5,10.5 8,13 7.5,16C9,14.5 11,14.5 12,15.5C13,14.5 15,14.5 16.5,16C16,13 16.5,10.5 18,9C15.5,7.5 13.5,5 12,2M4,13C3.5,15 2,16.5 1,17C2.5,17.5 4.5,17 5.5,15.5C5,14.5 4.5,14 4,13M20,13C19.5,14 19,14.5 18.5,15.5C19.5,17 21.5,17.5 23,17C22,16.5 20.5,15 20,13Z"/>
+                <path d="M12,2C10.5,5 8.5,7.5 6,9C7.5,10.5 8,13 7.5,16C9,14.5 11,14.5 12,15.5C13,14.5 15,14.5 16.5,16C16,13 16.5,10.5 18,9C15.5,7.5 13.5,5 12,2M4,13C3.5,15 2,16.5 1,17C2.5,17.5 4.5,17 5,16C4.5,15 4.5,14 4,13M20,13C19.5,14 19.5,15 20,16C20.5,17 22.5,17.5 24,17C23,16.5 21.5,15 21,13Z" />
             </svg>
             Give Me Wisdom
         </button>
     </div>
 
+    <div class="install-prompt" id="installPrompt">
+        <p>📱 Add Sam Quotes to your home screen!</p>
+        <button id="installBtn">Install App</button>
+    </div>
+
     <script>
-        // Expanded with the latest legendary Sam quotes
+        // Service Worker Registration
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('service-worker.js')
+                .then(registration => {
+                    console.log('Service Worker registered:', registration);
+                })
+                .catch(error => {
+                    console.log('Service Worker registration failed:', error);
+                });
+        }
+
+        // PWA Install Prompt
+        let deferredPrompt;
+        const installPrompt = document.getElementById('installPrompt');
+        const installBtn = document.getElementById('installBtn');
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            installPrompt.classList.add('show');
+        });
+
+        installBtn.addEventListener('click', async () => {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                console.log(`User response to install prompt: ${outcome}`);
+                deferredPrompt = null;
+                installPrompt.classList.remove('show');
+            }
+        });
+
+        window.addEventListener('appinstalled', () => {
+            console.log('PWA was installed');
+            installPrompt.classList.remove('show');
+            deferredPrompt = null;
+        });
+
+        // Quote Functionality
         const samQuotes = [
             ""I value the dollar more than my friends"",
             ""I'm gay"",
