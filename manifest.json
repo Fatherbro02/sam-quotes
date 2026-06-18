@@ -1,0 +1,15 @@
+{
+  "name": "Sam Quotes",
+  "short_name": "Sam Quotes",
+  "start_url": "index.html",
+  "display": "standalone",
+  "background_color": "#12141c",
+  "theme_color": "#00f0ff",
+  "icons": [
+    {
+      "src": "icon.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
